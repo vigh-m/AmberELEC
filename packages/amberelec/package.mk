@@ -25,10 +25,6 @@ else
 
   PKG_EMUS="${LIBRETRO_CORES}"
 
-  if [[ "${DEVICE}" == "RG552" ]]; then
-    PKG_EMUS+=" ${LIBRETRO_CORES_EXTRA}"
-  fi
-
   PKG_EMUS+=" advancemame ppssppsa amiberry hatarisa openbor scummvmsa solarus hypseus-singe ecwolf lzdoom gzdoom raze drastic duckstation mupen64plussa piemu yabasanshiroSA"
 fi
 

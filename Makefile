@@ -25,34 +25,12 @@ src-pkg:
 
 world:
 	DEVICE=RG351P ARCH=aarch64 ./scripts/build_distro
-	DEVICE=RG351V ARCH=aarch64 ./scripts/build_distro
-	DEVICE=RG351MP ARCH=aarch64 ./scripts/build_distro
-	DEVICE=RG552 ARCH=aarch64 ./scripts/build_distro
 
 RG351P:
 	DEVICE=RG351P ARCH=aarch64 ./scripts/build_distro
-
-RG351V:
-	DEVICE=RG351V ARCH=aarch64 ./scripts/build_distro
-
-RG351MP:
-	DEVICE=RG351MP ARCH=aarch64 ./scripts/build_distro
-
-RG552:
-	DEVICE=RG552 ARCH=aarch64 ./scripts/build_distro
-
 lib32:
 	DEVICE=RG351P ARCH=arm scripts/clean build-lib32
-	DEVICE=RG351V ARCH=arm scripts/clean build-lib32
-	DEVICE=RG351MP ARCH=arm scripts/clean build-lib32
-	DEVICE=RG552 ARCH=arm scripts/clean build-lib32
 	DEVICE=RG351P ARCH=arm scripts/build build-lib32
-	DEVICE=RG351V ARCH=arm scripts/build build-lib32
-	DEVICE=RG351MP ARCH=arm scripts/build build-lib32
-	DEVICE=RG552 ARCH=arm scripts/build build-lib32
-
-update:
-	DEVICE=RG552 ARCH=aarch64 ./scripts/update_packages
 
 package:
 	./scripts/build ${PACKAGE}
@@ -98,9 +76,6 @@ docker-%: INTERACTIVE=$(shell [ -t 0 ] && echo "-it")
 # By default pass through anything after `docker-` back into `make`
 docker-%: COMMAND=make $*
 
-# Get .env file ready
-docker-%: $(shell env | grep "=" > .env)
-
 # If the user issues a `make docker-shell` just start up bash as the shell to run commands
 docker-shell: COMMAND=bash
 
@@ -112,14 +87,6 @@ docker-image-build:
 docker-image-pull:
 	$(SUDO) $(DOCKER_CMD) pull $(DOCKER_IMAGE)
 
-# Command: pushes the latest Docker image to dockerhub.  This is *not* needed to build. It updates the latest build image in dockerhub for everyone.
-# Only AmberELEC admins in dockerhub can do this.
-#
-# You must login with: docker login --username <username> and provide either a password or token (from user settings -> security in dockerhub) before this will work.
-docker-image-push:
-	$(SUDO) $(DOCKER_CMD) push $(DOCKER_IMAGE)
-
 # Wire up docker to call equivalent make files using % to match and $* to pass the value matched by %
 docker-%:
-	$(SUDO) $(DOCKER_CMD) run $(PODMAN_ARGS) $(INTERACTIVE) --init --env-file .env --rm --user $(UID):$(GID) $(DEVELOPER_SETTINGS) -v $(PWD):$(DOCKER_WORK_DIR) -v $(HOME)/.cache:$(HOME)/.cache -w $(DOCKER_WORK_DIR) $(DOCKER_IMAGE) $(COMMAND)
-
+	$(SUDO) $(DOCKER_CMD) run $(PODMAN_ARGS) $(INTERACTIVE) --init --rm --user $(UID):$(GID) $(DEVELOPER_SETTINGS) $(if $(THREADCOUNT),-e THREADCOUNT=$(THREADCOUNT)) -v $(PWD):$(DOCKER_WORK_DIR) -v $(HOME)/.cache:$(HOME)/.cache -w $(DOCKER_WORK_DIR) $(DOCKER_IMAGE) $(COMMAND)
