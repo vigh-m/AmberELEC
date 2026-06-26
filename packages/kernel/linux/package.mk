@@ -7,7 +7,7 @@ PKG_NAME="linux_org"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kernel.org"
 PKG_DEPENDS_HOST="ccache:host openssl:host"
-PKG_DEPENDS_TARGET="toolchain linux:host cpio:host kmod:host xz:host wireless-regdb keyutils ${KERNEL_EXTRA_DEPENDS_TARGET}"
+PKG_DEPENDS_TARGET="toolchain linux:host cpio:host kmod:host xz:host keyutils ${KERNEL_EXTRA_DEPENDS_TARGET}"
 PKG_DEPENDS_INIT="toolchain"
 PKG_NEED_UNPACK="${LINUX_DEPENDS} $(get_pkg_directory busybox) ${PROJECT_DIR}/${PROJECT}/initramfs"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
@@ -122,11 +122,6 @@ pre_make_target() {
   fi
 
   kernel_make oldconfig
-
-  # regdb (backward compatability with pre-4.15 kernels)
-  if grep -q ^CONFIG_CFG80211_INTERNAL_REGDB= ${PKG_BUILD}/.config ; then
-    cp $(get_build_dir wireless-regdb)/db.txt ${PKG_BUILD}/net/wireless/db.txt
-  fi
 
   # copy video firmware (kernel won't compile without it)
   [ "${LINUX}" = "amlogic-4.9" ] && cp -PR $(get_build_dir media_modules-aml)/firmware ${PKG_BUILD}/firmware/video || :
@@ -294,9 +289,4 @@ makeinstall_init() {
 
 post_install() {
   mkdir -p ${INSTALL}/$(get_full_firmware_dir)/
-
-  # regdb and signature is now loaded as firmware by 4.15+
-    if grep -q ^CONFIG_CFG80211_REQUIRE_SIGNED_REGDB= ${PKG_BUILD}/.config; then
-      cp $(get_build_dir wireless-regdb)/regulatory.db{,.p7s} ${INSTALL}/$(get_full_firmware_dir)
-    fi
 }

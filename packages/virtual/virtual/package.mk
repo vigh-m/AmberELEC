@@ -10,6 +10,3 @@ PKG_DEPENDS_TARGET="qemu:host"
 PKG_SECTION="virtual"
 PKG_LONGDESC="virtual is a Meta package to install Virtual project extra dependencies"
 
-get_graphicdrivers
-
-listcontains "${GRAPHIC_DRIVERS}" "vmware" && PKG_DEPENDS_TARGET+=" open-vm-tools" || true

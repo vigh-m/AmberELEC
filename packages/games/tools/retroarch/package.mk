@@ -2,19 +2,15 @@
 # Copyright (C) 2021-present AmberELEC (https://github.com/AmberELEC)
 
 PKG_NAME="retroarch"
-PKG_VERSION="baee906ef35b99283f9a1a060a2ce5ac86159b63"
+PKG_VERSION="69a4f0ea1e8aaf442ae4858f2e7f2b31a1776576"
 PKG_SITE="https://github.com/libretro/RetroArch"
 PKG_URL="${PKG_SITE}.git"
 PKG_LICENSE="GPLv3"
-PKG_DEPENDS_TARGET="toolchain SDL2 alsa-lib openssl freetype zlib retroarch-assets core-info ffmpeg libass joyutils empty ${OPENGLES} nss-mdns openal-soft libogg libvorbis libvorbisidec libvpx libpng libdrm librga pulseaudio flac"
+PKG_DEPENDS_TARGET="toolchain SDL2 alsa-lib openssl freetype zlib retroarch-assets core-info ffmpeg libass joyutils empty ${OPENGLES} openal-soft libogg libvorbis libvorbisidec libvpx libpng libdrm librga pulseaudio flac"
 PKG_LONGDESC="Reference frontend for the libretro API."
 
 if [[ "${DEVICE}" =~ RG351 ]]; then
   PKG_PATCH_DIRS="RG351-ui-patches"
-fi
-
-if [[ "${DEVICE}" == RG552 ]]; then
-  PKG_PATCH_DIRS="RG552-ui-patches"
 fi
 
 pre_configure_target() {
@@ -56,7 +52,7 @@ pre_configure_target() {
 }
 
 make_target() {
-  make HAVE_LIBRETRODB=1 HAVE_NETWORKING=1 HAVE_LAKKA=1 HAVE_ZARCH=1 HAVE_QT=0 HAVE_LANGEXTRA=1 HAVE_LAKKA_PROJECT=0 HAVE_LAKKA_SERVER=0
+  make HAVE_LIBRETRODB=1 HAVE_NETWORKING=0 HAVE_LAKKA=1 HAVE_ZARCH=1 HAVE_QT=0 HAVE_LANGEXTRA=1 HAVE_LAKKA_PROJECT=0 HAVE_LAKKA_SERVER=0
   [ $? -eq 0 ] && echo "(retroarch ok)" || { echo "(retroarch failed)" ; exit 1 ; }
   make -C gfx/video_filters compiler=${CC} extra_flags="${CFLAGS}"
   [ $? -eq 0 ] && echo "(video filters ok)" || { echo "(video filters failed)" ; exit 1 ; }
