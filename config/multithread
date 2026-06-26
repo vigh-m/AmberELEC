@@ -160,6 +160,13 @@ start_multithread_build() {
         package_worker {%} {#} {##} {} || result=1
 
     rm -f "${THREAD_CONTROL}/parallel.pid"
+
+    if [ ${result} -ne 0 -a -f "${THREAD_CONTROL}/joblog" ]; then
+      echo "" >&2
+      echo "=== FAILED PACKAGES ===" >&2
+      awk -F'\t' 'NR>1 && $7!=0 {print "  " $9}' "${THREAD_CONTROL}/joblog" >&2
+      echo "" >&2
+    fi
   fi
 
   set +o pipefail

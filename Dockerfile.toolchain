@@ -1,0 +1,51 @@
+# Pre-built toolchain image for AmberELEC RG351P.
+#
+# Contains all :host packages already compiled. On first run, the toolchain
+# is copied into your mounted repo so subsequent builds skip the host phase.
+#
+# Build (slow, do once):
+#   docker build -f Dockerfile -t amberelec-build .
+#   docker build -f Dockerfile.toolchain -t amberelec-toolchain .
+#
+# Use:
+#   DOCKER_IMAGE=amberelec-toolchain make docker-RG351P
+#
+# First run seeds build.*/toolchain/ into your tree (~60s copy).
+# After that, host packages are never rebuilt.
+
+FROM amberelec-build AS builder
+
+COPY --chown=docker:docker . /work
+WORKDIR /work
+USER docker
+
+RUN DEVICE=RG351P ARCH=aarch64 scripts/build toolchain:host
+
+FROM amberelec-build
+
+COPY --from=builder --chown=docker:docker \
+  /work/build.AmberELEC-RG351P.aarch64/toolchain/ \
+  /opt/amberelec-toolchain/toolchain/
+
+COPY --from=builder --chown=docker:docker \
+  /work/build.AmberELEC-RG351P.aarch64/.stamps/ \
+  /opt/amberelec-toolchain/.stamps/
+
+COPY <<'EOF' /usr/local/bin/entrypoint.sh
+#!/bin/bash
+BUILD_DIR="build.AmberELEC-RG351P.aarch64"
+if [ ! -d "$BUILD_DIR/toolchain/bin" ]; then
+  echo "Seeding toolchain from pre-built cache..."
+  mkdir -p "$BUILD_DIR"
+  cp -al /opt/amberelec-toolchain/toolchain "$BUILD_DIR/"
+  cp -a /opt/amberelec-toolchain/.stamps "$BUILD_DIR/"
+  echo "Toolchain ready."
+fi
+exec "$@"
+EOF
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER docker
+WORKDIR /work
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

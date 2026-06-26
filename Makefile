@@ -28,6 +28,7 @@ world:
 
 RG351P:
 	DEVICE=RG351P ARCH=aarch64 ./scripts/build_distro
+
 lib32:
 	DEVICE=RG351P ARCH=arm scripts/clean build-lib32
 	DEVICE=RG351P ARCH=arm scripts/build build-lib32
@@ -81,7 +82,12 @@ docker-shell: COMMAND=bash
 
 # Command: builds docker image locally from Dockerfile
 docker-image-build:
-	$(SUDO) $(DOCKER_CMD) build . -t $(DOCKER_IMAGE)
+	$(SUDO) $(DOCKER_CMD) build . -t amberelec-build
+
+# Command: builds the toolchain image (slow, do once)
+docker-toolchain-build:
+	$(SUDO) $(DOCKER_CMD) build . -t amberelec-build
+	$(SUDO) $(DOCKER_CMD) build -f Dockerfile.toolchain . -t amberelec-toolchain
 
 # Command: pulls latest docker image from dockerhub.  This will *replace* locally built version.
 docker-image-pull:
